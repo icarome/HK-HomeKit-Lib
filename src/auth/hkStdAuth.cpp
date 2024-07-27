@@ -62,7 +62,7 @@ void HKStdAuth::Auth1_keying_material(uint8_t *keyingMaterial, const char *conte
 
 /**
  * Performs authentication using the STANDARD flow.
- * 
+ *
  * @return a tuple containing the following elements:
  * 1. A pointer to the issuer object (`hkIssuer_t*`)
  * 2. A pointer to the endpoint object (`hkEndpoint_t*`)
@@ -90,7 +90,7 @@ std::tuple<hkIssuer_t *, hkEndpoint_t *, DigitalKeySecureContext, std::vector<ui
   apdu.resize(apdu.size() + sigTlv.size());
   std::move(sigTlv.begin(), sigTlv.end(), apdu.begin() + 5);
   uint8_t response[128];
-  uint16_t responseLength = 128;
+  uint8_t responseLength = 128;
   LOG(D, "Auth1 APDU Length: %d, DATA: %s", apdu.size(), utils::bufToHexString(apdu.data(), apdu.size()).c_str());
   nfc.inDataExchange(apdu.data(), apdu.size(), response, &responseLength);
   LOG(D, "Auth1 Response Length: %d, DATA: %s", responseLength, utils::bufToHexString(response, responseLength).c_str());

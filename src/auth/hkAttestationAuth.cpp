@@ -55,14 +55,14 @@ std::tuple<std::vector<uint8_t>, std::vector<uint8_t>> HKAttestationAuth::envelo
 {
   uint8_t ctrlFlow[4] = {0x80, 0x3c, 0x40, 0xa0};
   uint8_t ctrlFlowRes[8];
-  uint16_t ctrlFlowResLen = 8;
+  uint8_t ctrlFlowResLen = 8;
   nfc.inDataExchange(ctrlFlow, sizeof(ctrlFlow), ctrlFlowRes, &ctrlFlowResLen);
   LOG(D, "CTRL FLOW RES LENGTH: %d, DATA: %s", ctrlFlowResLen, utils::bufToHexString(ctrlFlowRes, ctrlFlowResLen).c_str());
   if (ctrlFlowRes[0] == 0x90 && ctrlFlowRes[1] == 0x0)
   { // cla=0x00; ins=0xa4; p1=0x04; p2=0x00; lc=0x07(7); data=a0000008580102; le=0x00
     uint8_t data[] = {0x00, 0xA4, 0x04, 0x00, 0x07, 0xA0, 0x00, 0x00, 0x08, 0x58, 0x01, 0x02, 0x0};
     uint8_t response[4];
-    uint16_t responseLength = 4;
+    uint8_t responseLength = 4;
     nfc.inDataExchange(data, sizeof(data), response, &responseLength);
     LOG(D, "ENV1.2 RES LENGTH: %d, DATA: %s", responseLength, utils::bufToHexString(response, responseLength).c_str());
     if (response[0] == 0x90 && response[1] == 0x0){
@@ -79,7 +79,7 @@ std::tuple<std::vector<uint8_t>, std::vector<uint8_t>> HKAttestationAuth::envelo
       memcpy(env1Apdu + 5, envelope1Tlv.data(), envelope1Tlv.size());
       LOG(D, "APDU CMD LENGTH: %d, DATA: %s", sizeof(env1Apdu), utils::bufToHexString(env1Apdu, sizeof(env1Apdu)).c_str());
       uint8_t env1Res[128];
-      uint16_t env1ResLen = 128;
+      uint8_t env1ResLen = 128;
       nfc.inDataExchange(env1Apdu, sizeof(env1Apdu), env1Res, &env1ResLen);
       LOG(D, "APDU RES LENGTH: %d, DATA: %s", env1ResLen, utils::bufToHexString(env1Res, env1ResLen).c_str());
       if (env1Res[env1ResLen - 2] == 0x90 && env1Res[env1ResLen - 1] == 0x0){
@@ -147,7 +147,7 @@ std::vector<unsigned char> HKAttestationAuth::envelope2Cmd(std::vector<uint8_t> 
 
     memcpy(apdu + 5, tlv.data(), tlv.size());
     LOG(D, "ENV2 APDU - LENGTH: %d, DATA: %s\n", sizeof(apdu), utils::bufToHexString(apdu, sizeof(apdu)).c_str());
-    uint16_t newLen = 256;
+    uint8_t newLen = 255;
     uint8_t *env2Res = new unsigned char[256];
     std::vector<unsigned char> attestation_package;
     uint8_t getData[5] = {0x0, 0xc0, 0x0, 0x0, 0x0};
@@ -157,7 +157,7 @@ std::vector<unsigned char> HKAttestationAuth::envelope2Cmd(std::vector<uint8_t> 
     LOG(D, "env2Res Len: %d, Data: %s\n", newLen, utils::bufToHexString(env2Res, newLen).c_str());
     while (env2Res[newLen - 2] == 0x61)
     {
-      newLen = 256;
+      newLen = 255;
       nfc.inDataExchange(getData, sizeof(getData), env2Res, &newLen);
       attestation_package.insert(attestation_package.end(), env2Res, env2Res + newLen - (newLen > 250 ? 2 : 0));
       LOG(D, "env2Res Len: %d, Data: %s\n", newLen, utils::bufToHexString(env2Res, newLen).c_str());
@@ -183,7 +183,7 @@ std::tuple<hkIssuer_t*, std::vector<uint8_t>> HKAttestationAuth::verify(std::vec
   json root = cbor::decode_cbor<json>(decryptedCbor);
 
   hkIssuer_t* foundIssuer = nullptr;
-  
+
   std::vector<uint8_t> protectedHeaders;
   std::vector<uint8_t> issuerId;
   json a = root.at_or_null("documents");
@@ -279,7 +279,7 @@ std::tuple<hkIssuer_t *, std::vector<uint8_t>, KeyFlow> HKAttestationAuth::attes
   memcpy(xchApdu + 5, std::get<0>(encryptedCmd).data(), std::get<0>(encryptedCmd).size());
   LOG(V, "APDU CMD LENGTH: %d, DATA: %s", sizeof(xchApdu), utils::bufToHexString(xchApdu, sizeof(xchApdu)).c_str());
   uint8_t xchRes[16];
-  uint16_t xchResLen = 16;
+  uint8_t xchResLen = 16;
   nfc.inDataExchange(xchApdu, sizeof(xchApdu), xchRes, &xchResLen);
   LOG(D, "APDU RES LENGTH: %d, DATA: %s", xchResLen, utils::bufToHexString(xchRes, xchResLen).c_str());
   if (xchResLen > 2 && xchRes[xchResLen - 2] == 0x90)

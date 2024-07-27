@@ -35,11 +35,11 @@ HKAuthenticationContext::HKAuthenticationContext(PN532 &nfc, readerData_t &reade
 /**
  * The function `authenticate` in the `HKAuthenticationContext` class processes authentication data and
  * returns the issuer and endpoint IDs along with the authentication flow type.
- * 
+ *
  * @param hkFlow The `hkFlow` parameter in the `authenticate` function is an integer that determines
  * the type of HomeKey flow to be used for authentication. It can have the following values defined in
  * the `KeyFlow` enum: kFlowFAST, kFlowSTANDARD and kFlowATTESTATION
- * 
+ *
  * @return A tuple containing the matching `issuer_id` and `ep_id`, and the successful flow from
  * the enum `KeyFlow`.
  */
@@ -59,7 +59,7 @@ std::tuple<std::vector<uint8_t>, std::vector<uint8_t>, KeyFlow> HKAuthentication
   std::vector<uint8_t> apdu{0x80, 0x80, 0x01, 0x01, (uint8_t)len};
   apdu.insert(apdu.begin() + 5, fastTlv.begin(), fastTlv.end());
   std::vector<uint8_t> response(91);
-  uint16_t responseLength = 91;
+  uint8_t responseLength = 91;
   LOG(D, "Auth0 APDU Length: %d, DATA: %s", apdu.size(), utils::bufToHexString(apdu.data(), apdu.size()).c_str());
   nfc.inDataExchange(apdu.data(), apdu.size(), response.data(), &responseLength);
   ESP_LOG_BUFFER_HEX_LEVEL(TAG, response.data(), responseLength, ESP_LOG_VERBOSE);
@@ -152,16 +152,16 @@ std::tuple<std::vector<uint8_t>, std::vector<uint8_t>, KeyFlow> HKAuthentication
 /**
  * The function `HKAuthenticationContext::commandFlow` sends the command flow status APDU command
  * and returns the response.
- * 
+ *
  * @param status The parameter "status" is of type "CommandFlowStatus"
- * 
+ *
  * @return a std::vector<uint8_t> object, which contains the received response
  */
 std::vector<uint8_t> HKAuthenticationContext::commandFlow(CommandFlowStatus status)
 {
   uint8_t apdu[4] = {0x80, 0x3c, status, status == kCmdFlowAttestation ? (uint8_t)0xa0 : (uint8_t)0x0};
   std::vector<uint8_t> cmdFlowRes(4);
-  uint16_t cmdFlowResLen = cmdFlowRes.size();
+  uint8_t cmdFlowResLen = cmdFlowRes.size();
   LOG(D, "APDU: %s, Length: %d", utils::bufToHexString(apdu, sizeof(apdu)).c_str(), sizeof(apdu));
   nfc.inDataExchange(apdu, sizeof(apdu), cmdFlowRes.data(), &cmdFlowResLen);
   return cmdFlowRes;
